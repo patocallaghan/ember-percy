@@ -24,21 +24,23 @@ export function percySnapshot(name, options) {
   // and Percy is not enabled anyway).
   if (!window.Testem) { return; }
 
-  let domCopy = percyJQuery('html').clone();
-  let bodyCopy = domCopy.find('body');
+  try {
+    var percy = new window.Percy.PercyAgentClient(
+      'ember-percy',
+      getNativeXhr(),
+      (documentClone) => {
+        let testingContainer = documentClone.querySelector('#ember-testing');
+        documentClone.querySelector('body').innerHTML = testingContainer.innerHTML;
 
-  var percy = new Percy.PercyAgentClient(
-    'ember-percy',
-    getNativeXhr,
-    (documentClone) => {
-      let testingContainer = documentClone.querySelector('#ember-testing');
-      documentClone.querySelector('body').innerHTML = testingContainer.innerHTML;
+        return documentClone;
+      }
+    );
 
-      return documentClone;
-    }
-  );
-
-  run(function() {
-    percy.snapshot(name, { enableJavascript: true });
-  });
+    run(function () {
+      percy.snapshot(name, { enableJavascript: true });
+    });
+  } catch(e) {
+    console.error(e);
+    console.log('WARNING! percy-agent not started. Please start percy-agent before running tests.');
+  }
 }
