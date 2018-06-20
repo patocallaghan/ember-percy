@@ -45,7 +45,7 @@ export function percySnapshot(name, options) {
     );
 
     run(function () {
-      percy.snapshot(name, { enableJavascript: true });
+      percy.snapshot(name, options);
     });
   } catch (e) {
     console.error(e.message);
