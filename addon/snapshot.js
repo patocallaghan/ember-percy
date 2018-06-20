@@ -24,6 +24,14 @@ export function percySnapshot(name, options) {
   // and Percy is not enabled anyway).
   if (!window.Testem) { return; }
 
+  // Automatic name generation for QUnit tests by passing in the `assert` object.
+  if (name.test && name.test.module && name.test.module.name && name.test.testName) {
+    name = `${name.test.module.name} | ${name.test.testName}`;
+  } else if (name.fullTitle) {
+    // Automatic name generation for Mocha tests by passing in the `this.test` object.
+    name = name.fullTitle();
+  }
+
   try {
     var percy = new window.Percy.PercyAgentClient(
       'ember-percy',
@@ -39,8 +47,9 @@ export function percySnapshot(name, options) {
     run(function () {
       percy.snapshot(name, { enableJavascript: true });
     });
-  } catch(e) {
-    console.error(e);
-    console.log('WARNING! percy-agent not started. Please start percy-agent before running tests.');
+  } catch (e) {
+    console.error(e.message);
+    console.error(e.stack);
+    console.log('WARNING! Ensure percy-agent has been started. To start, run "percy-agent start" before running tests.');
   }
 }
